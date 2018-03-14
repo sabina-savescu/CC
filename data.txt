@@ -1,0 +1,11 @@
+[
+    {
+        "id": "1",
+        "name": "Kitty",
+        "breed": "Mixed",
+        "sex": "female",
+        "age": "2",
+        "colour": "orange/white"
+    }
+]
+//lista + ce-i cu put/delete??

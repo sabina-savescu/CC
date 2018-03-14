@@ -1,10 +1,5 @@
 <?php
 
-// url fain
-// interfata html  
-// cod de eroare
-// date gata de introdus
-//ce inseamna niste chestii
 
 include("Cats.php");
 
@@ -33,54 +28,82 @@ switch ($verb) {
     case 'GET':
         $field;
         $value;
-        if (!empty($url_pieces[2])) {
+        
+        if (!empty($url_pieces[3])) {
             $field = $url_pieces[2];
             $value = $url_pieces[3];
             $response = $cats->search($field, $value);
-        } else {
+            
+        } 
+        else if (empty($url_pieces[3])&&!empty($url_pieces[2])){ 
+            http_response_code(404); //Not Found
+            return;
+            //$response = '{"status":"Not Found"}';
+        }
+        else {
             $response = $cats->get_all();
         }
+        if(empty($response)){
+            http_response_code(204); //No Content
+            return;
+            
+        }
+        header("Content-Type: application/json");
         $response=json_encode($response);
+        echo $response;
+        
         break;
 
     case 'POST':
-        $params = json_decode(file_get_contents("php://input"), true);
-        if (!$params) {
-            trigger_error("Invalid json",E_USER_WARNING); 
+        $body = json_decode(file_get_contents("php://input"), true);
+        if (!$body) {
+            http_response_code(400); //Bad Request
+            return;
+            //trigger_error("Invalid json",E_USER_WARNING); 
         }
        
+       foreach($body as $resource){
         $cat = new Cat();
-        foreach ($params as $key => $value)
+        foreach ($resource as $key => $value)     
+            if (!array_key_exists($key, $cat)){
+                http_response_code(400); //Bad Request
+                return;
+                //trigger_error("Invalid JSON",E_USER_WARNING);
+            }
         
-        if (!array_key_exists($key, $cat)){
-            http_response_code(400);
-            trigger_error("Invalid JSON",E_USER_WARNING);
-        }
-        
-        $cat->set($params);
-        
-            
+        $cat->set($resource);  
         $cats->add($cat);
-        $response = '{"status":"OK"}';
-        http_response_code(201);
-        break;
+    }
+        http_response_code(201); //Created
+        return;
 
     case 'PUT':
-        $params = json_decode(file_get_contents("php://input"), true);
-        if (!$params) {
-            throw new Exception("response missing or invalid");
+        $body = json_decode(file_get_contents("php://input"), true);
+        if (!$body) {
+            http_response_code(400); //Bad Request
+            return;
+            //trigger_error("Invalid json",E_USER_WARNING); 
         }
-        $id;
         if (!empty($url_pieces[2])) {
             $id = $url_pieces[2];
-        }
-        $cat = new Cat();
+        
+        foreach($body as $resource){
+            $cat = new Cat();
+            foreach ($resource as $key => $value)
+                if (!array_key_exists($key, $cat)){
+                    http_response_code(400); //Bad Request
+                    return;
+            //trigger_error("Invalid JSON",E_USER_WARNING);
+            }
         $cat->id = $id;
-        $cat->set($params);
+        $cat->set($resource);
         $cats->update($cat);
-        $response = '{"status":"OK"}';
-        http_response_code(200);
-        break;
+        }
+    }
+        else 
+        
+        http_response_code(200); //status OK
+        return;
 
     case 'DELETE':
         $id;
@@ -88,14 +111,15 @@ switch ($verb) {
             $id = $url_pieces[2];
             $cats->delete($id);
         }
-        $response = '{"status":"OK"}';
-        http_response_code(200);
+        else $cats->delete_all();
+        
+        http_response_code(200); //status OK
         break;
 
     default:
-        throw new Exception('Method Not Supported', 405);
+        http_response_code(405); //Method Not Allowed
 }
-header("Content-Type: application/json");
-echo $response;
+
+
 ?>
 

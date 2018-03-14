@@ -74,6 +74,12 @@ private $conn;
             oci_bind_by_name($query, ':id', $id, -1);
             oci_execute($query);
         }
+
+        public function delete_all() {
+            $query='truncate table CATS';
+            $query = oci_parse($this->conn, $query);
+            oci_execute($query);
+        }
     
         public function update($cat) {
             $query = 'UPDATE CATS SET NAME=:name, BREED=:breed, AGE=:age, SEX=:sex, COLOUR=:colour '
