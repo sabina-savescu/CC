@@ -1,11 +1,46 @@
 [
     {
-        "id": "1",
         "name": "Kitty",
-        "breed": "Mixed",
+        "breed": "mixed",
         "sex": "female",
         "age": "2",
         "colour": "orange/white"
     }
+,
+    {
+        "name": "KitKat",
+        "breed": "Birman",
+        "sex": "male",
+        "age": "1",
+        "colour": "brown"
+    },
+    {
+        "name": "Cat",
+        "breed": "Ragdoll",
+        "sex": "female",
+        "age": "3",
+        "colour": "white"
+    },
+    {
+        "name": "Night",
+        "breed": "mixed",
+        "sex": "female",
+        "age": "4",
+        "colour": "black"
+    },
+    {
+        "name": "Sasha",
+        "breed": "Persian",
+        "sex": "female",
+        "age": "2",
+        "colour": "white"
+    },
+    {
+        "name": "Rainbow",
+        "breed": "mixed",
+        "sex": "male",
+        "age": "2",
+        "colour": "multicolour"
+    }
+    
 ]
-//lista + ce-i cu put/delete??

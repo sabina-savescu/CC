@@ -24,6 +24,7 @@ if ($url_pieces[1] != 'cats') {
 
 $cats = new Cats ();
 $response;
+header("Content-Type: application/json");
 switch ($verb) {
     case 'GET':
         $field;
@@ -48,7 +49,6 @@ switch ($verb) {
             return;
             
         }
-        header("Content-Type: application/json");
         $response=json_encode($response);
         echo $response;
         
@@ -73,7 +73,11 @@ switch ($verb) {
         
         $cat->set($resource);  
         $cats->add($cat);
+        $response=json_encode($resource);
+        echo $response;
+
     }
+        
         http_response_code(201); //Created
         return;
 
@@ -84,36 +88,69 @@ switch ($verb) {
             return;
             //trigger_error("Invalid json",E_USER_WARNING); 
         }
-        if (!empty($url_pieces[2])) {
-            $id = $url_pieces[2];
+        if (!empty($url_pieces[3])) {
+            $field = $url_pieces[2];
+            $value = $url_pieces[3];
+            $response = $cats->search($field, $value);
+            if(empty($response)){
+                http_response_code(404); //No Content
+                return;
+                
+            }
+            
         
         foreach($body as $resource){
             $cat = new Cat();
-            foreach ($resource as $key => $value)
+            foreach ($resource as $key => $valu)
                 if (!array_key_exists($key, $cat)){
                     http_response_code(400); //Bad Request
                     return;
             //trigger_error("Invalid JSON",E_USER_WARNING);
-            }
-        $cat->id = $id;
-        $cat->set($resource);
-        $cats->update($cat);
+                }
+            
+            if ($field=='id'){
+                $cat->id = $value; 
+            }else if ($field=='breed')
+                $cat->breed = $value;
+            
+            $cat->set($resource);
+            $cats->update($cat,$field,$value);
         }
-    }
+        }
+ 
+        else if (empty($url_pieces[3])&&!empty($url_pieces[2])){ 
+            http_response_code(404); //Not Found
+            return;
+            //$response = '{"status":"Not Found"}';
+        }
         else 
         
         http_response_code(200); //status OK
         return;
 
     case 'DELETE':
-        $id;
-        if (!empty($url_pieces[2])) {
-            $id = $url_pieces[2];
-            $cats->delete($id);
+        if (!empty($url_pieces[3])) {
+            $field = $url_pieces[2];
+            $value = $url_pieces[3];
+            $response = $cats->search($field, $value);
+            if(empty($response)){
+                http_response_code(404); //No Content
+                return;
+                
+            }
+            $cats->delete($field,$value);
+            
+            
+        } 
+        else if (empty($url_pieces[3])&&!empty($url_pieces[2])){ 
+            http_response_code(404); //Not Found
+            return;
+            //$response = '{"status":"Not Found"}';
         }
+    
         else $cats->delete_all();
         
-        http_response_code(200); //status OK
+        http_response_code(204); //No Content
         break;
 
     default:

@@ -44,8 +44,8 @@ private $conn;
             $response = Array();
         if ($field=='id'){
             $filter = 'ID'; 
-        }else if ($field=='name'){
-            $filter = 'NAME';
+        }else if ($field=='breed'){
+            $filter = 'BREED';
         
         }else{
             throw new Exception('Unknown field');
@@ -68,10 +68,18 @@ private $conn;
             return $response;
         }
     
-        public function delete($id) {
-            $query = 'DELETE FROM cats WHERE ID = :id';
+        public function delete($field, $value) {
+            if ($field=='id'){
+                $filter = 'ID'; 
+            }else if ($field=='breed'){
+                $filter = 'BREED';
+            
+            }else{
+                throw new Exception('Unknown field');
+            }
+            $query = 'DELETE FROM cats WHERE ' . $filter . '=:value';
             $query = oci_parse($this->conn, $query);
-            oci_bind_by_name($query, ':id', $id, -1);
+            oci_bind_by_name($query, ':value', $value, -1);
             oci_execute($query);
         }
 
@@ -81,16 +89,20 @@ private $conn;
             oci_execute($query);
         }
     
-        public function update($cat) {
-            $query = 'UPDATE CATS SET NAME=:name, BREED=:breed, AGE=:age, SEX=:sex, COLOUR=:colour '
-                    . 'WHERE ID=:id';
+        public function update($cat,$field,$value) {
+            $query = 'UPDATE CATS SET NAME=:name, BREED=:breed, AGE=:age, SEX=:sex, COLOUR=:colour 
+            WHERE ' . $field . '=:value';
             $query = oci_parse($this->conn, $query);
+            
             oci_bind_by_name($query, ':name', $cat->name);
-            oci_bind_by_name($query, ':breed', $cat->breed);
             oci_bind_by_name($query, ':sex', $cat->sex);
             oci_bind_by_name($query, ':age', $cat->age);
+            oci_bind_by_name($query, ':breed', $cat->breed);
             oci_bind_by_name($query, ':colour', $cat->colour);
-            oci_bind_by_name($query, ':id', $cat->id);
+            if($field=='id')
+            oci_bind_by_name($query, ':value', $value);
+            else
+            oci_bind_by_name($query, ':value', $value);
             oci_execute($query);
         }
     
@@ -99,8 +111,10 @@ private $conn;
             $sql = "SELECT ID from(SELECT ID FROM CATS ORDER BY ID DESC)where ROWNUM='1'";
             $result = oci_parse($this->conn, $sql);
             oci_execute($result);
+            $id=0;
             while(oci_fetch($result))
             $id=oci_result($result,"ID")+1;
+            if(!$id) $id=1;
             
         
             $query = 'INSERT INTO CATS (ID, NAME, BREED, SEX, AGE, COLOUR) '
