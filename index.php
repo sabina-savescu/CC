@@ -55,6 +55,7 @@ switch ($verb) {
         break;
 
     case 'POST':
+    $response=Array();
         $body = json_decode(file_get_contents("php://input"), true);
         if (!$body) {
             http_response_code(400); //Bad Request
@@ -73,11 +74,12 @@ switch ($verb) {
         
         $cat->set($resource);  
         $cats->add($cat);
-        $response=json_encode($resource);
-        echo $response;
+        array_push($response,$resource);
+        
 
     }
-        
+        $response=json_encode($response);
+        echo $response;
         http_response_code(201); //Created
         return;
 
